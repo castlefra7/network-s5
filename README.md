@@ -1,6 +1,6 @@
 # network-s5
 
-ETU982
+ETU982 Lachapelle Kaky Jean Philippe
 
 A simple python program for network analysis and network simulation.
 
