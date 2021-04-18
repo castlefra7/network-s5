@@ -9,9 +9,9 @@ class Application(tk.Frame):
         self.btn_calculate = tk.Button(self)
 
         entry_text = tk.StringVar()
-        entry_text.set("2340:0:10:100:1000:ABCD:101:1010")
+        entry_text.set("3124::DEAD:CAFE:FF:FE00:1")
         entry_text_mask = tk.StringVar()
-        entry_text_mask.set("64")
+        entry_text_mask.set("80")
 
         self.input_mask = tk.Entry(self, textvariable=entry_text_mask)
         self.label_mask = tk.Label(self, text="Saisissez votre masque ou bien CIDR (Si IPV6 alors CIDR seulement):")
@@ -42,9 +42,15 @@ class Application(tk.Frame):
 
             if network_analysis.is_ipv6():
                 network_address = network_analysis.get_network_address_v6()
+                number_addresses = network_analysis.get_hosts_number_v6()
+                first_address = network_analysis.get_first_ip_v6()
+                last_address = network_analysis.get_last_ip_v6()
                 value = """
-                Addresse réseau: {}
-                """.format(network_address)
+                Addresse réseau: \n{}
+                Nombre addresses disponible: \n{}
+                Première addresse: \n{}
+                Dernière addresse: \n{}
+                """.format(network_address, number_addresses, first_address, last_address)
             else:
                 network_address = network_analysis.get_network_address()
                 diff_address = network_analysis.get_broadcast_ip()
@@ -54,7 +60,7 @@ class Application(tk.Frame):
                 value = """
                 Addresse réseau: {}
                 Addresse diffusion: {}
-                Nombre addresses dispo: {}
+                Nombre addresses disponible: {}
                 Première addresse: {}
                 Dernière addresse: {}
                 """.format(network_address, diff_address, number_addresses, first_address,

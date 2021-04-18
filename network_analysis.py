@@ -6,28 +6,24 @@ def mask_length(mask):
     return result
 
 
-def complete_mask(mask_b):
-    ending = ""
-    for b in range(32 - 1, mask_length(mask_b) - 1, -1):
-        ending += "0"
-        if b % 8 == 0:
-            ending += "."
-    return mask_b + ending[::-1]
-
-
 def create_binary_mask(cidr):
     result = ""
-    for b in range(int(cidr)):
-        result += "1"
+    for b in range(40):
+        if b < int(cidr):
+            result += "1"
+        else:
+            result += "0"
         if (b + 1) % 8 == 0 and (b + 1) != 32:
             result += "."
+        if b == 32:
+            break
     return result
 
 
 def cidr_to_b_mask(cidr):
     if int(cidr) > 128 or int(cidr) <= 0:
         raise Exception("Veuillez entrer un CIDR valide")
-    c_mask = complete_mask(create_binary_mask(cidr))
+    c_mask = create_binary_mask(cidr)
     return c_mask
 
 
@@ -50,6 +46,51 @@ def calculate_mask(mask):
         return mask
 
     return cidr_to_mask(mask)
+
+
+def or_operator(part_ip, part_mask):
+    sp_part_ip = list(part_ip)
+    sp_part_mask = part_mask.split(".")
+    n_sp_part_mask = []
+    for part in sp_part_mask:
+        n_sp_part_mask.append(str(int(part, base=2) ^ 15))
+    result = []
+    for i in range(len(sp_part_ip)):
+        c = sp_part_ip[i]
+        c_i = 0
+        if c == 'A':
+            c_i = 10
+        elif c == 'B':
+            c_i = 11
+        elif c == 'C':
+            c_i = 12
+        elif c == 'D':
+            c_i = 13
+        elif c == 'E':
+            c_i = 14
+        elif c == 'F':
+            c_i = 15
+        else:
+            c_i = int(sp_part_ip[i])
+
+        r = int(c_i) | int(n_sp_part_mask[i])
+        v = ""
+        if r == 10:
+            v = 'A'
+        elif r == 11:
+            v = 'B'
+        elif r == 12:
+            v = 'C'
+        elif r == 13:
+            v = 'D'
+        elif r == 14:
+            v = 'E'
+        elif r == 15:
+            v = 'F'
+        else:
+            v = str(r)
+        result.append(v)
+    return ''.join(result)
 
 
 def and_operator(part_ip, part_mask):
@@ -110,10 +151,43 @@ class NetworkAnalysis:
             return True
         return False
 
-    def get_polished_ipv6(self):
+    def get_full_ip_v6(self):
+        if self.ip.count(" ") > 0:
+            raise Exception("Supprimer les espaces dans l'addresse IP")
+        ip = self.ip
         if self.ip.count("::") > 0:
-            raise Exception("Veuillez compléter les :: (Ce programme ne supporte pas cette abréviation)")
-        ip_sp = self.ip.split(":")
+            count = 0
+            ip_two_parts = self.ip.split("::")
+            first_part_count = len(ip_two_parts[0].split(":"))
+            second_part_count = 0
+            if len(ip_two_parts) > 1:
+                if ip_two_parts[1].count(":") > 0:
+                    second_part_count = len(ip_two_parts[1].split(":"))
+            count = first_part_count + second_part_count
+            remain = 8 - count
+            sp_ip = list(ip)
+            new_ip = []
+            sub_str = ""
+            for i in range(len(sp_ip)):
+                if sp_ip[i] == ':':
+                    if sub_str != "":
+                        new_ip.append(sub_str)
+                    if sp_ip[(i+1) % len(sp_ip)] == ':':
+                        for j in range(remain):
+                            new_ip.append("0")
+                    sub_str = ""
+                else:
+                    sub_str += str(sp_ip[i])
+            if sub_str != "":
+                new_ip.append(sub_str)
+            ip = new_ip
+        else:
+            ip = self.ip.split(":")
+        return ip
+
+    def get_polished_ipv6(self):
+
+        ip_sp = self.get_full_ip_v6()
         new_ip_sp = []
         for numb in ip_sp:
             if len(numb) < 4:
@@ -198,6 +272,10 @@ class NetworkAnalysis:
                 result += 1
         return 2 ** result - 2
 
+    def get_hosts_number_v6(self):
+        i_mask = int(self.mask)
+        return 2**(128 - i_mask)
+
     def get_first_ip(self):
         if self.get_hosts_number() < 2:
             return self.ip
@@ -208,6 +286,17 @@ class NetworkAnalysis:
         network_address[len(network_address) - 1] += 1
         network_address = [str(numb) for numb in network_address]
         return '.'.join(network_address)
+
+    def get_first_ip_v6(self):
+        return self.get_network_address_v6()
+
+    def get_last_ip_v6(self):
+        ip_sp = self.get_decimal_ipv6()
+        mask_sp = self.get_ipv6_mask().split(":")
+        final = []
+        for i in range(len(ip_sp)):
+            final.append(or_operator(ip_sp[i], mask_sp[i]))
+        return '.'.join(final)
 
     def get_last_ip(self):
         if self.get_hosts_number() < 2:
