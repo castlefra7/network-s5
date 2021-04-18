@@ -1,11 +1,13 @@
-# network-s5
+# Network Analysis and Simulation (S5)
 
-ETU982 Lachapelle Kaky Jean Philippe
+<strong>ETU982 Lachapelle Kaky Jean Philippe</strong>
 
+<p>
 A simple python program for network analysis and network simulation.
+</p>
 
-In order to run the first program:
-run_addressage.py
+<h3>To run the first program:</h3>
+<strong>run_addressage.py</strong>
 
-For the second program:
-run_simulation.py
+<h3>For the second program:</h3>
+<strong>run_simulation.py</strong>
