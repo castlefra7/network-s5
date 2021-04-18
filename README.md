@@ -1,4 +1,7 @@
 # network-s5
+
+ETU982
+
 A simple python program for network analysis and network simulation.
 
 In order to run the first program:
