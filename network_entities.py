@@ -2,10 +2,17 @@ from network_analysis import NetworkAnalysis
 
 
 class Packet:
-    last_router = None
-
-    def __init__(self, src_ip=None, src_mac=None, dest_ip=None, dest_mac=None, data=None, mask=None, dest_orig_ip=None,
-                 src_orig_ip=None):
+    def __init__(
+            self,
+            src_ip=None,
+            src_mac=None,
+            dest_ip=None,
+            dest_mac=None,
+            data=None,
+            mask=None,
+            dest_orig_ip=None,
+            src_orig_ip=None,
+            switch_org_routes=None):
         self.src_ip = src_ip
         self.src_mac = src_mac
         if dest_orig_ip is None:
@@ -20,6 +27,7 @@ class Packet:
         self.dest_mac = dest_mac
         self.data = data
         self.dest_mask = mask
+        self.switch_org_routes = switch_org_routes
 
         if not self.dest_mask:
             raise Exception("Veuillez spécifier un masque réseau")
@@ -28,25 +36,79 @@ class Packet:
         if not self.src_mac:
             raise Exception("Veuillez spécifier l'addresse MAC source")
 
+        self.last_router = None
+        self.switch_org_routes = []
+        self.switch_routes = []
+        self.switch_src = None
+        self.is_outside = False
+
 
 class Frame(Packet):
-    def _init__(self, src_ip, src_mac, dest_ip, dest_mac, mask=None, dest_orig_ip=None,
-                src_orig_ip=None):
+    def _init__(
+            self,
+            src_ip,
+            src_mac,
+            dest_ip,
+            dest_mac,
+            mask=None,
+            dest_orig_ip=None,
+            src_orig_ip=None):
         self.data = None
-        super().__init__(src_ip, src_mac, dest_ip, dest_mac, self.data, mask, dest_orig_ip, src_orig_ip)
+        super().__init__(
+            src_ip,
+            src_mac,
+            dest_ip,
+            dest_mac,
+            self.data,
+            mask,
+            dest_orig_ip,
+            src_orig_ip)
 
 
 class ARPResponsePacket(Packet):
-    def _init__(self, src_ip, src_mac, dest_ip, dest_mac, mask=None, dest_orig_ip=None,
-                src_orig_ip=None):
+    def _init__(
+            self,
+            src_ip,
+            src_mac,
+            dest_ip,
+            dest_mac,
+            mask=None,
+            dest_orig_ip=None,
+            src_orig_ip=None):
         self.data = None
-        super().__init__(src_ip, src_mac, dest_ip, dest_mac, self.data, mask, dest_orig_ip, src_orig_ip)
+        super().__init__(
+            src_ip,
+            src_mac,
+            dest_ip,
+            dest_mac,
+            self.data,
+            mask,
+            dest_orig_ip,
+            src_orig_ip)
 
 
 class ARPRequestPacket(Packet):
-    def _init__(self, src_ip, src_mac, dest_ip, dest_mac, mask=None, dest_orig_ip=None, src_orig_ip=None):
+    def _init__(
+            self,
+            src_ip,
+            src_mac,
+            dest_ip,
+            dest_mac,
+            mask=None,
+            dest_orig_ip=None,
+            src_orig_ip=None,
+            switch_org_routes=None):
         self.data = None
-        super().__init__(src_ip, src_mac, dest_ip, dest_mac, self.data, mask, dest_orig_ip, src_orig_ip)
+        super().__init__(
+            src_ip,
+            src_mac,
+            dest_ip,
+            dest_mac,
+            self.data,
+            mask,
+            dest_orig_ip,
+            src_orig_ip,
+            switch_org_routes)
 
 
 class MACInfo:
@@ -89,3 +151,9 @@ class NetworkConnectivity:
     def __init__(self, network_info, network_inter):
         self.net_info = network_info
         self.net_inter = network_inter
+
+
+class SwitchRouteTable:
+    def __init__(self, mac=None, routes=None):
+        self.mac = mac
+        self.routes = routes
